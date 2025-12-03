@@ -9,8 +9,9 @@ import {
 
 import { NgIf, NgFor, CurrencyPipe } from '@angular/common';
 import { Product } from '../product';
-import { Subscription, tap } from 'rxjs';
+import { catchError, EMPTY, Subscription, tap } from 'rxjs';
 import { ProductService } from '../product.service';
+import { HttpErrorService } from 'src/app/utilities/http-error.service';
 
 @Component({
   selector: 'pm-product-detail',
@@ -38,7 +39,13 @@ export class ProductDetailComponent implements OnChanges, OnDestroy {
     if (id) {
       this.sub = this.productService
         .getProduct(this.productId)
-        .pipe(tap(() => console.log('In product detail pipeline')))
+        .pipe(
+          tap(() => console.log('In product detail pipeline')),
+          catchError((err) => {
+            this.errorMessage = err;
+            return EMPTY;
+          })
+        )
         .subscribe((product) => {
           this.product = product;
         });
